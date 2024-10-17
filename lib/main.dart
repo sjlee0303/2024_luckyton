@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/date_symbol_data_local.dart'; // 로케일 초기화를 위한 import
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // 비동기 작업이 필요한 경우 호출
+  await initializeDateFormatting('ko_KR', null); // 한국어 로케일 데이터 초기화
   runApp(MyApp());
 }
 
@@ -10,11 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '그림일기',
+      title: 'Flutter Calendar and Diary',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: CalendarPage(), // 기본 페이지로 CalendarPage 설정
+      home: CalendarPage(),
     );
   }
 }
@@ -32,28 +35,30 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Monthly Calendar'),
+        title: GestureDetector(
+          onTap: () => _selectYearMonth(context),
+          child: Text('${_focusedDay.year}년 ${_focusedDay.month}월'),
+        ),
       ),
       body: Column(
         children: [
           TableCalendar(
+            locale: 'ko_KR',
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
             focusedDay: _focusedDay,
-            calendarFormat: CalendarFormat.month, // 월별 형식 고정
-            availableCalendarFormats: const {     // 월별 형식으로만 표시되도록 고정
-              CalendarFormat.month: 'Month',
+            calendarFormat: CalendarFormat.month,
+            availableCalendarFormats: const {
+              CalendarFormat.month: '월',
             },
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
+            headerVisible: false,
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
               });
 
-              // 날짜가 선택되었을 때 DiaryPage로 이동
+              // 선택한 날짜로 DiaryPage로 이동
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -63,13 +68,94 @@ class _CalendarPageState extends State<CalendarPage> {
             },
             onPageChanged: (focusedDay) {
               setState(() {
-                _focusedDay = focusedDay; // 이전/다음 달로 변경 시 포커스 업데이트
+                _focusedDay = focusedDay;
               });
             },
           ),
+          if (_focusedDay.month != DateTime.now().month ||
+              _focusedDay.year != DateTime.now().year)
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _focusedDay = DateTime.now();
+                });
+              },
+              child: Text('오늘'),
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _selectYearMonth(BuildContext context) async {
+    int selectedYear = _focusedDay.year;
+    int selectedMonth = _focusedDay.month;
+
+    await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              height: 300,
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    '년도와 월을 선택하세요',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  DropdownButton<int>(
+                    value: selectedYear,
+                    items: List.generate(20, (index) {
+                      int year = DateTime.now().year - 10 + index;
+                      return DropdownMenuItem(
+                        value: year,
+                        child: Text(year.toString()),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedYear = value!;
+                      });
+                    },
+                  ),
+                  DropdownButton<int>(
+                    value: selectedMonth,
+                    items: List.generate(12, (index) {
+                      int month = index + 1;
+                      return DropdownMenuItem(
+                        value: month,
+                        child: Text('$month월'),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedMonth = value!;
+                      });
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _focusedDay = DateTime(selectedYear, selectedMonth, 1);
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Text('확인'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    ).then((_) {
+      setState(() {
+        _focusedDay = DateTime(selectedYear, selectedMonth, 1);
+      });
+    });
   }
 }
 
@@ -95,7 +181,6 @@ class _DiaryPageState extends State<DiaryPage> {
     _pageController = PageController(initialPage: 0);
   }
 
-  // 녹음 버튼 클릭 시 동작할 함수
   void _onRecordButtonPressed() {
     setState(() {
       _isListening = !_isListening;
@@ -103,7 +188,6 @@ class _DiaryPageState extends State<DiaryPage> {
     });
   }
 
-  // 페이지가 변경될 때 호출되는 함수
   void _onPageChanged(int index) {
     setState(() {
       _currentDate = widget.selectedDate.add(Duration(days: index));
@@ -114,7 +198,7 @@ class _DiaryPageState extends State<DiaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('일기 작성: ${DateFormat('MM월 dd일').format(widget.selectedDate)}'),
+        title: Text('일기 작성: ${DateFormat('MM월 dd일').format(_currentDate)}'),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -126,19 +210,17 @@ class _DiaryPageState extends State<DiaryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 선택한 날짜 표시
                 Flexible(
                   child: Center(
                     child: Text(
                       DateFormat('MM월 dd일').format(date),
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   ),
                   flex: 1,
                 ),
                 SizedBox(height: 10),
-
-                // 사진 첨부 공간 (임시)
                 Flexible(
                   child: Container(
                     height: 200,
@@ -154,21 +236,16 @@ class _DiaryPageState extends State<DiaryPage> {
                   flex: 4,
                 ),
                 SizedBox(height: 10),
-
-                // 음성 녹음 및 텍스트 표시
                 Flexible(
                   child: Container(
                     child: Row(
                       children: [
-                        // 녹음 버튼
                         IconButton(
                           icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
                           onPressed: _onRecordButtonPressed,
                           color: Colors.red,
                         ),
                         SizedBox(width: 10),
-
-                        // 녹음된 텍스트 표시
                         Expanded(
                           child: Container(
                             height: MediaQuery.of(context).size.height * 0.3,
@@ -181,8 +258,6 @@ class _DiaryPageState extends State<DiaryPage> {
                           ),
                         ),
                         SizedBox(width: 10),
-
-                        // 텍스트 전송 버튼
                         IconButton(
                           icon: Icon(Icons.send),
                           onPressed: () {
