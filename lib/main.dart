@@ -97,12 +97,12 @@ class _CalendarPageState extends State<CalendarPage> {
         titleTextStyle: TextStyle(
           fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         backgroundColor: Colors.white,//배경색상 지정
-        title: Text('Monthly Calendar'),
+//        title: Text('Monthly Calendar'),
 //=======
-//        title: GestureDetector(
-//          onTap: () => _selectYearMonth(context),
-//          child: Text('${_focusedDay.year}년 ${_focusedDay.month}월'),
-//        ),
+        title: GestureDetector(
+          onTap: () => _selectYearMonth(context),
+          child: Text('${_focusedDay.year}년 ${_focusedDay.month}월'),
+        ),
 //>>>>>>> origin/yeeun
       ),
       body: Column(
