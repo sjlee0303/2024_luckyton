@@ -17,7 +17,60 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: CalendarPage(),
+      home: MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    CalendarPage(),
+    FriendsPage(), // 친구 추가 페이지로 변경
+    PlaceholderWidget(Colors.grey, "Page 3"),
+    PlaceholderWidget(Colors.grey, "Page 4"),
+  ];
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        selectedItemColor: Colors.red, // 선택된 탭의 아이콘 및 텍스트 색상
+        unselectedItemColor: Colors.grey, // 선택되지 않은 탭의 아이콘 및 텍스트 색상
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: '캘린더',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group_add),
+            label: '친구 추가', // 탭 이름 변경
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'Page 3',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Page 4',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -44,8 +97,8 @@ class _CalendarPageState extends State<CalendarPage> {
         children: [
           TableCalendar(
             locale: 'ko_KR',
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
+            firstDay: DateTime.utc(2014, 1, 1),
+            lastDay: DateTime.utc(2033, 12, 31),
             focusedDay: _focusedDay,
             calendarFormat: CalendarFormat.month,
             availableCalendarFormats: const {
@@ -275,6 +328,44 @@ class _DiaryPageState extends State<DiaryPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class FriendsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('친구 추가'),
+      ),
+      body: Center(
+        child: Text(
+          '친구 추가 페이지',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+}
+
+// Placeholder Widget for additional pages
+class PlaceholderWidget extends StatelessWidget {
+  final Color color;
+  final String text;
+
+  PlaceholderWidget(this.color, this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 24, color: Colors.white),
+        ),
       ),
     );
   }
