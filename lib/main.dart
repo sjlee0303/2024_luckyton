@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: '그림일기',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -32,6 +33,9 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        titleTextStyle: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        backgroundColor: Colors.white,//배경색상 지정
         title: Text('Monthly Calendar'),
       ),
       body: Column(
@@ -114,7 +118,11 @@ class _DiaryPageState extends State<DiaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('일기 작성: ${DateFormat('MM월 dd일').format(widget.selectedDate)}'),
+        title: Text('${DateFormat('MM월 dd일').format(widget.selectedDate)}'),
+        titleTextStyle: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        backgroundColor: Colors.white,//배경색상 지정
+        foregroundColor: Colors.black,//전면색상 지정
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -141,9 +149,19 @@ class _DiaryPageState extends State<DiaryPage> {
                 // 사진 첨부 공간 (임시)
                 Flexible(
                   child: Container(
+                    // 디자인
+                    decoration: BoxDecoration(
+                      color : Colors.grey[300],
+                      border: Border.all(
+                        color : Colors.grey,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+
                     height: 200,
                     width: double.infinity,
-                    color: Colors.grey[300],
+                    
+                    //color: Colors.grey[300],
                     child: Center(
                       child: Text(
                         "사진을 첨부하세요",
@@ -171,12 +189,21 @@ class _DiaryPageState extends State<DiaryPage> {
                         // 녹음된 텍스트 표시
                         Expanded(
                           child: Container(
+                            decoration: BoxDecoration(
+                              color : Colors.white,
+                              border: Border.all(
+                                color : Colors.grey,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             height: MediaQuery.of(context).size.height * 0.3,
                             padding: EdgeInsets.all(10.0),
-                            color: Colors.grey[200],
-                            child: Text(
-                              _text.isEmpty ? "녹음된 텍스트 표시" : _text,
-                              style: TextStyle(fontSize: 16),
+                            //color: Colors.grey[200],
+                            child: Center(
+                              child: Text(
+                                _text.isEmpty ? "녹음된 텍스트 표시" : _text,
+                                style: TextStyle(fontSize: 16),
+                              ),
                             ),
                           ),
                         ),
@@ -184,11 +211,11 @@ class _DiaryPageState extends State<DiaryPage> {
 
                         // 텍스트 전송 버튼
                         IconButton(
-                          icon: Icon(Icons.send),
+                          icon: Icon(Icons.add_task),
                           onPressed: () {
                             print("텍스트 전송: $_text");
                           },
-                          color: Colors.blue,
+                          color: Colors.red,
                         ),
                       ],
                     ),
