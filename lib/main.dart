@@ -94,15 +94,15 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
       appBar: AppBar(
 //<<<<<<< HEAD
-//        titleTextStyle: TextStyle(
-//          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-//        backgroundColor: Colors.white,//배경색상 지정
-//        title: Text('Monthly Calendar'),
+        titleTextStyle: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        backgroundColor: Colors.white,//배경색상 지정
+        title: Text('Monthly Calendar'),
 //=======
-        title: GestureDetector(
-          onTap: () => _selectYearMonth(context),
-          child: Text('${_focusedDay.year}년 ${_focusedDay.month}월'),
-        ),
+//        title: GestureDetector(
+//          onTap: () => _selectYearMonth(context),
+//          child: Text('${_focusedDay.year}년 ${_focusedDay.month}월'),
+//        ),
 //>>>>>>> origin/yeeun
       ),
       body: Column(
@@ -378,6 +378,10 @@ class FriendsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('친구 추가'),
+        titleTextStyle: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        backgroundColor: Colors.white,//배경색상 지정
+        foregroundColor: Colors.black,//전면색상 지정
       ),
       body: Center(
         child: Text(
